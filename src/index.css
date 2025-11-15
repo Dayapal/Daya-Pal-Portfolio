@@ -1,2 +1,191 @@
 @import "tailwindcss";
 
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  overflow-x: hidden 
+}
+
+/* -------- Premium Human-Centered Scrollbar -------- */
+
+/* Main scrollbar track - creates calmness through soft colors */
+::-webkit-scrollbar {
+  width: 14px;
+  height: 14px;
+}
+
+/* Scrollbar track - subtle background that doesn't distract */
+::-webkit-scrollbar-track {
+  background: linear-gradient(180deg, 
+    rgba(15, 23, 42, 0.6) 0%, 
+    rgba(30, 41, 59, 0.4) 50%, 
+    rgba(15, 23, 42, 0.6) 100%);
+  backdrop-filter: blur(12px) saturate(180%);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 
+    inset 0 2px 4px rgba(255, 255, 255, 0.05),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Scrollbar thumb - trust-building gradient with smooth animation */
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, 
+    #60a5fa 0%,    /* Soft blue - calming */
+    #3b82f6 25%,   /* Trust blue */
+    #6366f1 50%,   /* Indigo - confidence */
+    #4f46e5 75%,   /* Deep indigo - professionalism */
+    #3730a3 100%   /* Royal blue - authority */
+  );
+  border-radius: 12px;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 
+    0 4px 12px rgba(59, 130, 246, 0.3),
+    0 2px 6px rgba(99, 102, 241, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+  
+  /* Smooth size transition for psychological comfort */
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Hover state - inviting and responsive */
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, 
+    #93c5fd 0%,    /* Lighter blue - approachable */
+    #60a5fa 25%, 
+    #818cf8 50%, 
+    #6366f1 75%, 
+    #4f46e5 100%
+  );
+  transform: scaleX(1.1);
+  box-shadow: 
+    0 6px 16px rgba(59, 130, 246, 0.4),
+    0 4px 8px rgba(99, 102, 241, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+/* Active state - satisfying feedback */
+::-webkit-scrollbar-thumb:active {
+  background: linear-gradient(180deg, 
+    #3b82f6 0%, 
+    #2563eb 25%, 
+    #4f46e5 50%, 
+    #4338ca 75%, 
+    #3730a3 100%
+  );
+  transform: scaleX(1.05);
+  box-shadow: 
+    0 2px 8px rgba(59, 130, 246, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* Corner styling for completeness */
+::-webkit-scrollbar-corner {
+  background: rgba(15, 23, 42, 0.8);
+  backdrop-filter: blur(8px);
+}
+
+/* Firefox Support */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #3b82f6 rgba(30, 41, 59, 0.4);
+}
+
+/* Enhanced smooth scrolling with psychological pacing */
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 2rem;
+}
+
+/* Custom scroll behavior for different sections */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  /* Psychological pacing - faster for short distances, slower for long */
+  .smooth-scroll {
+    scroll-behavior: smooth;
+    scroll-snap-type: y proximity;
+  }
+}
+
+/* Additional psychological enhancements */
+
+/* Focus indicators for accessibility and clarity */
+:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Selection color that matches the theme */
+::selection {
+  background: rgba(59, 130, 246, 0.3);
+  color: white;
+}
+
+::-moz-selection {
+  background: rgba(59, 130, 246, 0.3);
+  color: white;
+}
+
+/* Psychological color psychology applied:
+   - Blue gradients: Trust, calmness, professionalism
+   - Smooth transitions: Comfort and predictability  
+   - Subtle shadows: Depth and sophistication
+   - Responsive hover: Engagement and feedback
+   - Rounded corners: Approachability and safety
+*/
+
+/* Premium loading states */
+.loading-scrollbar {
+  opacity: 0.7;
+  transition: opacity 0.3s ease;
+}
+
+.loading-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, 
+    rgba(96, 165, 250, 0.7) 0%,
+    rgba(59, 130, 246, 0.7) 50%,
+    rgba(99, 102, 241, 0.7) 100%
+  );
+}
+
+/* Dark mode optimization */
+@media (prefers-color-scheme: dark) {
+  ::-webkit-scrollbar-track {
+    background: linear-gradient(180deg, 
+      rgba(2, 6, 23, 0.8) 0%,
+      rgba(15, 23, 42, 0.6) 50%,
+      rgba(2, 6, 23, 0.8) 100%
+    );
+  }
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    transform: scaleX(1.05);
+  }
+}
+
+/* Performance optimization */
+@media (prefers-reduced-motion: reduce) {
+  ::-webkit-scrollbar-thumb {
+    transition: none;
+  }
+  
+  html {
+    scroll-behavior: auto;
+  }
+}

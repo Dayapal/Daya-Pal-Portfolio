@@ -10,17 +10,18 @@ import Experience from './components/Experience';
 import Contact from './components/Contact';
 import Footer from './components/Footer';
 
+
 function App() {
   return (
     
       <Router>
-        <div className="bg-gray-900 transition-colors duration-300">
+        <div className="bg-gray-900 transition-colors duration-300 w-full overflow-x-hidden ">
           <Navbar />
+        
           <Hero />
           <About />
           <Skills />
           <Projects />
-          
           <Experience />
           <Contact />
           <Footer />
