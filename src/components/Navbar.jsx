@@ -1,12 +1,13 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { FaBars, FaTimes, FaUser, FaCode, FaBriefcase, FaEnvelope, FaHome, FaAward } from 'react-icons/fa';
 
 const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('home');
   const [scrolled, setScrolled] = useState(false);
-  
+  const mobileMenuRef = useRef(null);
+
   const navLinks = [
     { name: 'Home', href: '#home', icon: <FaHome className="w-4 h-4" /> },
     { name: 'About', href: '#about', icon: <FaUser className="w-4 h-4" /> },
@@ -16,14 +17,31 @@ const Navbar = () => {
     { name: 'Contact', href: '#contact', icon: <FaEnvelope className="w-4 h-4" /> },
   ];
 
+  // Close mobile menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target)) {
+        setMobileMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('touchstart', handleClickOutside);
+    
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+    };
+  }, []);
+
   // Scrollspy effect with improved logic
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 20);
-      
+
       const scrollPosition = window.scrollY + 100;
       const sections = navLinks.map(link => document.querySelector(link.href));
-      
+
       sections.forEach((section, index) => {
         if (section) {
           const top = section.offsetTop;
@@ -34,21 +52,46 @@ const Navbar = () => {
         }
       });
     };
-    
+
     window.addEventListener('scroll', handleScroll, { passive: true });
     handleScroll(); // Initial check
-    
+
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  const scrollToSection = (id) => {
+    const section = document.getElementById(id);
+    if (section) {
+      const offset = 70; // adjust for navbar height
+      const sectionPosition = section.offsetTop - offset;
+
+      window.scrollTo({
+        top: sectionPosition,
+        behavior: "smooth",
+      });
+      
+      // Close mobile menu after clicking a link
+      setMobileMenuOpen(false);
+    }
+  };
+
+  const handleMobileLinkClick = (href) => {
+    const id = href.replace('#', '');
+    scrollToSection(id);
+  };
+
+  const handleToggleMenu = () => {
+    setMobileMenuOpen(prev => !prev);
+  };
 
   return (
     <motion.nav
       initial={{ y: -100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
-      className={`fixed w-full z-30 transition-all duration-300 ${
-        scrolled 
-          ? 'bg-slate-900/95 backdrop-blur-xl shadow-lg border-b border-slate-700/50' 
+      className={`fixed w-full z-50 transition-all duration-300 ${
+        scrolled
+          ? 'bg-slate-900/95 backdrop-blur-xl shadow-lg border-b border-slate-700/50'
           : 'bg-slate-900/80 backdrop-blur-md'
       }`}
     >
@@ -60,6 +103,7 @@ const Navbar = () => {
             animate={{ x: 0, opacity: 1 }}
             transition={{ duration: 0.7, delay: 0.1 }}
             className="flex items-center space-x-3 group cursor-pointer"
+            onClick={() => scrollToSection('home')}
           >
             <div className="relative">
               <motion.div
@@ -90,19 +134,27 @@ const Navbar = () => {
               >
                 <a
                   href={link.href}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleMobileLinkClick(link.href);
+                  }}
                   className={`relative flex items-center space-x-2 px-4 py-2 rounded-xl font-medium transition-all duration-300 group ${
                     activeSection === link.href.slice(1)
                       ? 'text-white bg-blue-500/10 shadow-lg shadow-blue-500/10'
                       : 'text-slate-300 hover:text-white hover:bg-slate-800/50'
                   }`}
                 >
-                  <span className={`transition-colors duration-300 ${
-                    activeSection === link.href.slice(1) ? 'text-blue-400' : 'text-slate-400 group-hover:text-blue-300'
-                  }`}>
+                  <span
+                    className={`transition-colors duration-300 ${
+                      activeSection === link.href.slice(1)
+                        ? 'text-blue-400'
+                        : 'text-slate-400 group-hover:text-blue-300'
+                    }`}
+                  >
                     {link.icon}
                   </span>
                   <span>{link.name}</span>
-                  
+
                   {/* Enhanced Active Indicator */}
                   {activeSection === link.href.slice(1) && (
                     <motion.div
@@ -111,7 +163,7 @@ const Navbar = () => {
                       transition={{ type: "spring", stiffness: 300, damping: 30 }}
                     />
                   )}
-                  
+
                   {/* Hover Effect */}
                   <motion.div
                     className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-indigo-500/5 rounded-xl opacity-0 group-hover:opacity-100"
@@ -123,19 +175,20 @@ const Navbar = () => {
           </div>
 
           {/* Enhanced Mobile Navigation Toggle */}
-          <motion.div 
+          <motion.div
             className="md:hidden flex items-center"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
             <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              onClick={handleToggleMenu}
               className={`p-3 rounded-xl transition-all duration-300 ${
-                mobileMenuOpen 
-                  ? 'bg-blue-500/20 text-blue-400' 
+                mobileMenuOpen
+                  ? 'bg-blue-500/20 text-blue-400'
                   : 'text-slate-300 hover:bg-slate-800/50 hover:text-white'
               }`}
               aria-label="Toggle menu"
+              aria-expanded={mobileMenuOpen}
             >
               <motion.div
                 animate={{ rotate: mobileMenuOpen ? 180 : 0 }}
@@ -156,6 +209,7 @@ const Navbar = () => {
       <AnimatePresence>
         {mobileMenuOpen && (
           <motion.div
+            ref={mobileMenuRef}
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
@@ -164,27 +218,30 @@ const Navbar = () => {
           >
             <div className="px-4 py-3 space-y-2">
               {navLinks.map((link, index) => (
-                <motion.a
+                <motion.button
                   key={link.name}
-                  href={link.href}
-                  onClick={() => setMobileMenuOpen(false)}
+                  onClick={() => handleMobileLinkClick(link.href)}
                   initial={{ x: -20, opacity: 0 }}
                   animate={{ x: 0, opacity: 1 }}
                   transition={{ duration: 0.4, delay: index * 0.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className={`flex items-center space-x-3 px-4 py-3 rounded-xl text-base font-medium transition-all duration-300 group ${
+                  className={`flex items-center space-x-3 px-4 py-3 rounded-xl text-base font-medium transition-all duration-300 group w-full text-left ${
                     activeSection === link.href.slice(1)
                       ? 'text-white bg-blue-500/20 shadow-lg shadow-blue-500/10 border border-blue-400/30'
                       : 'text-slate-300 hover:text-white hover:bg-slate-700/50'
                   }`}
                 >
-                  <span className={`transition-colors duration-300 ${
-                    activeSection === link.href.slice(1) ? 'text-blue-400' : 'text-slate-400 group-hover:text-blue-300'
-                  }`}>
+                  <span
+                    className={`transition-colors duration-300 ${
+                      activeSection === link.href.slice(1)
+                        ? 'text-blue-400'
+                        : 'text-slate-400 group-hover:text-blue-300'
+                    }`}
+                  >
                     {link.icon}
                   </span>
                   <span>{link.name}</span>
-                  
+
                   {/* Mobile active indicator */}
                   {activeSection === link.href.slice(1) && (
                     <motion.div
@@ -193,12 +250,12 @@ const Navbar = () => {
                       className="w-2 h-2 bg-blue-400 rounded-full ml-auto"
                     />
                   )}
-                </motion.a>
+                </motion.button>
               ))}
             </div>
-            
+
             {/* Mobile menu footer */}
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.3 }}
