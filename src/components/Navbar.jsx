@@ -34,55 +34,88 @@ const Navbar = () => {
     };
   }, []);
 
-  // Scrollspy effect with improved logic
+  // SIMPLIFIED scrollspy - let's debug this
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 20);
 
-      const scrollPosition = window.scrollY + 100;
-      const sections = navLinks.map(link => document.querySelector(link.href));
+      // Simple section detection
+      const sections = ['home', 'about', 'skills', 'projects', 'experience', 'contact'];
+      const scrollY = window.scrollY + 100;
 
-      sections.forEach((section, index) => {
+      for (let i = sections.length - 1; i >= 0; i--) {
+        const section = document.getElementById(sections[i]);
         if (section) {
-          const top = section.offsetTop;
-          const bottom = top + section.offsetHeight;
-          if (scrollPosition >= top && scrollPosition < bottom) {
-            setActiveSection(navLinks[index].href.slice(1));
+          const offsetTop = section.offsetTop;
+          const offsetBottom = offsetTop + section.offsetHeight;
+          
+          if (scrollY >= offsetTop && scrollY < offsetBottom) {
+            setActiveSection(sections[i]);
+            break;
           }
         }
-      });
+      }
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll(); // Initial check
+    // Initial check after a small delay to ensure DOM is ready
+    setTimeout(handleScroll, 100);
 
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const scrollToSection = (id) => {
-    const section = document.getElementById(id);
+  // SIMPLIFIED and more reliable scroll function
+  const scrollToSection = (sectionId) => {
+    console.log('Scrolling to:', sectionId); // Debug log
+    
+    const section = document.getElementById(sectionId);
     if (section) {
-      const offset = 70; // adjust for navbar height
-      const sectionPosition = section.offsetTop - offset;
-
-      window.scrollTo({
-        top: sectionPosition,
-        behavior: "smooth",
-      });
+      console.log('Section found:', section); // Debug log
       
-      // Close mobile menu after clicking a link
+      const navbarHeight = 80; // Approximate navbar height
+      const sectionPosition = section.offsetTop - navbarHeight;
+
+      // Close mobile menu first
+      setMobileMenuOpen(false);
+
+      // Use requestAnimationFrame for better reliability
+      requestAnimationFrame(() => {
+        window.scrollTo({
+          top: sectionPosition,
+          behavior: 'smooth'
+        });
+      });
+    } else {
+      console.log('Section not found:', sectionId); // Debug log
+      // Fallback: try hash navigation
+      window.location.hash = sectionId;
       setMobileMenuOpen(false);
     }
   };
 
-  const handleMobileLinkClick = (href) => {
-    const id = href.replace('#', '');
-    scrollToSection(id);
+  // Unified click handler for both desktop and mobile
+  const handleNavClick = (e, href) => {
+    e.preventDefault();
+    const sectionId = href.replace('#', '');
+    scrollToSection(sectionId);
   };
 
   const handleToggleMenu = () => {
     setMobileMenuOpen(prev => !prev);
   };
+
+  // Prevent body scroll when mobile menu is open
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [mobileMenuOpen]);
 
   return (
     <motion.nav
@@ -97,7 +130,7 @@ const Navbar = () => {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 items-center">
-          {/* Enhanced Logo */}
+          {/* Logo */}
           <motion.div
             initial={{ x: -50, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
@@ -112,18 +145,13 @@ const Navbar = () => {
               >
                 <span className="text-white font-bold text-sm">P</span>
               </motion.div>
-              <motion.div
-                className="absolute inset-0 border-2 border-blue-400/30 rounded-xl"
-                animate={{ rotate: 360 }}
-                transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-              />
             </div>
             <span className="text-white font-bold text-xl bg-gradient-to-r from-blue-200 to-indigo-200 bg-clip-text">
               Portfolio
             </span>
           </motion.div>
 
-          {/* Enhanced Desktop Navigation */}
+          {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-1">
             {navLinks.map((link, index) => (
               <motion.div
@@ -132,12 +160,8 @@ const Navbar = () => {
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ duration: 0.5, delay: 0.1 + index * 0.1 }}
               >
-                <a
-                  href={link.href}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handleMobileLinkClick(link.href);
-                  }}
+                <button
+                  onClick={(e) => handleNavClick(e, link.href)}
                   className={`relative flex items-center space-x-2 px-4 py-2 rounded-xl font-medium transition-all duration-300 group ${
                     activeSection === link.href.slice(1)
                       ? 'text-white bg-blue-500/10 shadow-lg shadow-blue-500/10'
@@ -154,27 +178,12 @@ const Navbar = () => {
                     {link.icon}
                   </span>
                   <span>{link.name}</span>
-
-                  {/* Enhanced Active Indicator */}
-                  {activeSection === link.href.slice(1) && (
-                    <motion.div
-                      layoutId="activeIndicator"
-                      className="absolute inset-0 border border-blue-400/30 rounded-xl shadow-lg shadow-blue-500/20"
-                      transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                    />
-                  )}
-
-                  {/* Hover Effect */}
-                  <motion.div
-                    className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-indigo-500/5 rounded-xl opacity-0 group-hover:opacity-100"
-                    transition={{ duration: 0.3 }}
-                  />
-                </a>
+                </button>
               </motion.div>
             ))}
           </div>
 
-          {/* Enhanced Mobile Navigation Toggle */}
+          {/* Mobile Navigation Toggle */}
           <motion.div
             className="md:hidden flex items-center"
             whileHover={{ scale: 1.05 }}
@@ -188,43 +197,33 @@ const Navbar = () => {
                   : 'text-slate-300 hover:bg-slate-800/50 hover:text-white'
               }`}
               aria-label="Toggle menu"
-              aria-expanded={mobileMenuOpen}
             >
-              <motion.div
-                animate={{ rotate: mobileMenuOpen ? 180 : 0 }}
-                transition={{ duration: 0.3, ease: "easeInOut" }}
-              >
-                {mobileMenuOpen ? (
-                  <FaTimes className="w-5 h-5" />
-                ) : (
-                  <FaBars className="w-5 h-5" />
-                )}
-              </motion.div>
+              {mobileMenuOpen ? (
+                <FaTimes className="w-5 h-5" />
+              ) : (
+                <FaBars className="w-5 h-5" />
+              )}
             </button>
           </motion.div>
         </div>
       </div>
 
-      {/* Enhanced Mobile Menu */}
+      {/* Mobile Menu */}
       <AnimatePresence>
         {mobileMenuOpen && (
           <motion.div
             ref={mobileMenuRef}
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
-            className="md:hidden fixed top-16 left-0 w-full overflow-x-hidden bg-slate-800/95 backdrop-blur-xl border-t border-slate-700/50 shadow-2xl z-40"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ duration: 0.2 }}
+            className="md:hidden absolute top-16 left-0 right-0 bg-slate-800/95 backdrop-blur-xl border-t border-slate-700/50 shadow-2xl z-40"
           >
             <div className="px-4 py-3 space-y-2">
-              {navLinks.map((link, index) => (
-                <motion.button
+              {navLinks.map((link) => (
+                <button
                   key={link.name}
-                  onClick={() => handleMobileLinkClick(link.href)}
-                  initial={{ x: -20, opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  transition={{ duration: 0.4, delay: index * 0.05 }}
-                  whileTap={{ scale: 0.95 }}
+                  onClick={(e) => handleNavClick(e, link.href)}
                   className={`flex items-center space-x-3 px-4 py-3 rounded-xl text-base font-medium transition-all duration-300 group w-full text-left ${
                     activeSection === link.href.slice(1)
                       ? 'text-white bg-blue-500/20 shadow-lg shadow-blue-500/10 border border-blue-400/30'
@@ -241,30 +240,9 @@ const Navbar = () => {
                     {link.icon}
                   </span>
                   <span>{link.name}</span>
-
-                  {/* Mobile active indicator */}
-                  {activeSection === link.href.slice(1) && (
-                    <motion.div
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      className="w-2 h-2 bg-blue-400 rounded-full ml-auto"
-                    />
-                  )}
-                </motion.button>
+                </button>
               ))}
             </div>
-
-            {/* Mobile menu footer */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.3 }}
-              className="px-4 py-3 border-t border-slate-700/50"
-            >
-              <div className="text-center text-slate-400 text-sm">
-                Navigation
-              </div>
-            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
